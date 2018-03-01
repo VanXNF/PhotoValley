@@ -8,10 +8,25 @@
     android:fitsSystemWindows="true">
 
     <TextView
+        android:id="@+id/lucky_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Valley"
-        android:textColor="#fff"
+        android:text="Photo"
+        android:layout_marginTop="30dp"
+        android:layout_marginLeft="20dp"
+        android:textColor="#FFFFFF"
+        android:textSize="40sp"
         />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignStart="@id/lucky_text"
+        android:layout_alignTop="@id/lucky_text"
+        android:layout_marginStart="28dp"
+        android:layout_marginTop="32dp"
+        android:text="Valley"
+        android:textColor="#FFFFFF"
+        android:textSize="40sp" />
 
 </vanxnf.photovalley.SnakeMenu.RelativeLayoutWithSnakeMenu>
