@@ -3,12 +3,15 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/relative_layout"
     android:layout_width="match_parent"
-    android:layout_height="match_parent" >
+    android:layout_height="match_parent"
+    android:background="@drawable/mind_storm"
+    android:fitsSystemWindows="true">
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Just For Test"
+        android:text="Valley"
+        android:textColor="#fff"
         />
 
 </vanxnf.photovalley.SnakeMenu.RelativeLayoutWithSnakeMenu>
