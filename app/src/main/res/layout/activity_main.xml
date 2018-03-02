@@ -73,7 +73,7 @@
         android:textSize="40sp" />
 
     <com.fangxu.allangleexpandablebutton.AllAngleExpandableButton
-        android:id="@+id/button_expandable_90_180"
+        android:id="@+id/button_expandable"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"

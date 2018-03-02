@@ -1,14 +1,15 @@
 package vanxnf.photovalley;
 
+import android.app.ActivityOptions;
+import android.content.Intent;
 import android.graphics.Color;
-import android.graphics.Typeface;
+import android.media.MediaPlayer;
 import android.os.Build;
-import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.view.Gravity;
+import android.transition.Transition;
+import android.transition.TransitionInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.TextView;
@@ -19,17 +20,15 @@ import com.fangxu.allangleexpandablebutton.AllAngleExpandableButton;
 import com.fangxu.allangleexpandablebutton.ButtonData;
 import com.fangxu.allangleexpandablebutton.ButtonEventListener;
 
-import java.security.PrivateKey;
 import java.util.ArrayList;
 import java.util.List;
 
 import tangxiaolv.com.library.EffectiveShapeView;
 import tyrantgit.explosionfield.ExplosionField;
-import vanxnf.photovalley.SnakeMenu.RelativeLayoutWithSnakeMenu;
+import vanxnf.photovalley.Util.Utility;
 
 public class MainActivity extends AppCompatActivity {
 
-    private RelativeLayoutWithSnakeMenu snakeMenu;
 
     private TextView LuckyText;
 
@@ -37,19 +36,23 @@ public class MainActivity extends AppCompatActivity {
 
     private EffectiveShapeView lastImage;
 
+    private EffectiveShapeView takePhoto;
+
+    private EffectiveShapeView chooseFromAlbum;
+
+    private AllAngleExpandableButton expandableButton;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         //实现透明状态栏
-        if (Build.VERSION.SDK_INT >= 21) {
-            Window window = getWindow();
-            window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
-            window.getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN | View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
-            window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
-            window.setStatusBarColor(Color.TRANSPARENT);
-        }
+        Utility.setStatusBarTransparent(getWindow());
+
         setContentView(R.layout.activity_main);
         lastImage = (EffectiveShapeView) findViewById(R.id.last_image);
+        takePhoto = (EffectiveShapeView) findViewById(R.id.take_photo);
+        chooseFromAlbum = (EffectiveShapeView) findViewById(R.id.choose_from_album);
+        expandableButton = (AllAngleExpandableButton) findViewById(R.id.button_expandable);
         mExplosionField = ExplosionField.attach2Window(this);
         initExpandableButton();
 //        //设置浮动按钮的点击事件
@@ -60,22 +63,12 @@ public class MainActivity extends AppCompatActivity {
 //                Toast.makeText(MainActivity.this, "menu click", Toast.LENGTH_LONG).show();
 //            }
 //        });
-
-        EffectiveShapeView shapeView = (EffectiveShapeView) findViewById(R.id.last_image);
-        shapeView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // TODO: 2018/3/1 点击图片跳转滤镜页面待完成，粒子爆炸效果待完成
-                Toast.makeText(MainActivity.this, "image click", Toast.LENGTH_LONG).show();
-            }
-        });
     }
 
     private void initExpandableButton() {
         //start angle 90 end angle 180
-        final AllAngleExpandableButton button = (AllAngleExpandableButton) findViewById(R.id.button_expandable_90_180);
         final List<ButtonData> buttonDatas = new ArrayList<>();
-        int[] drawable = {R.drawable.home, R.drawable.fab_like, R.drawable.fab_delete, R.drawable.fab_setting};
+        int[] drawable = {R.drawable.home, R.drawable.fab_delete, R.drawable.fab_revert, R.drawable.fab_setting};
         int[] color = {R.color.background, R.color.red, R.color.brown, R.color.orange};
         for (int i = 0; i < 4; i++) {
             ButtonData buttonData;
@@ -87,43 +80,67 @@ public class MainActivity extends AppCompatActivity {
             buttonData.setBackgroundColorId(this, color[i]);
             buttonDatas.add(buttonData);
         }
-        button.setButtonDatas(buttonDatas);
-        setListener(button);
+        expandableButton.setButtonDatas(buttonDatas);
     }
 
-    private void setListener(AllAngleExpandableButton button) {
-        button.setButtonEventListener(new ButtonEventListener() {
+    @Override
+    protected void onResume() {
+        super.onResume();
+        //最后编辑图片
+        lastImage = (EffectiveShapeView) findViewById(R.id.last_image);
+        lastImage.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onButtonClicked(int index) {
-                showToast("clicked index:" + index);
-                switch (index) {
+            public void onClick(View v) {
+                // TODO: 2018/3/1 点击图片跳转图片编辑页面
+                Intent intent = new Intent(MainActivity.this, EditActivity.class);
+                startActivity(intent, ActivityOptions.makeSceneTransitionAnimation(MainActivity.this).toBundle());
+            }
+        });
+        //拍照
+        takePhoto.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mExplosionField.explode(v);
+                // TODO: 2018/3/2 跳转相机
+            }
+        });
+        //从相册选择
+        chooseFromAlbum.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mExplosionField.explode(v);
+                // TODO: 2018/3/2 跳转相册选择界面
+            }
+        });
+        //拓展按钮
+        expandableButton.setButtonEventListener(new ButtonEventListener() {
+            @Override
+            public void onButtonClicked(int i) {
+                switch (i) {
                     case 1:
-                        break;
-                    case 2:
                         // TODO: 2018/3/2 同时清除缓存 设置image不可见
                         mExplosionField.explode(lastImage);
                         break;
+                    case 2:
+                        //还原image
+                        // TODO: 2018/3/2 还原删除操作
+                        lastImage.setScaleX(1);
+                        lastImage.setScaleY(1);
+                        lastImage.setAlpha(1.0f);
+                        break;
                     case 3:
+                        // TODO: 2018/3/2 设置界面 引导界面
                         break;
                     default:
                 }
             }
 
             @Override
-            public void onExpand() {
-//                showToast("onExpand");
-
-            }
+            public void onExpand() {}
 
             @Override
-            public void onCollapse() {
-//                showToast("onCollapse");
-            }
+            public void onCollapse() {}
         });
-    }
-
-    private void showToast(String toast) {
-        Toast.makeText(this, toast, Toast.LENGTH_SHORT).show();
     }
 
 }
