@@ -45,9 +45,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        //实现透明状态栏
         Utility.setStatusBarTransparent(getWindow());
-
         setContentView(R.layout.activity_main);
         lastImage = (EffectiveShapeView) findViewById(R.id.last_image);
         takePhoto = (EffectiveShapeView) findViewById(R.id.take_photo);
@@ -55,14 +53,7 @@ public class MainActivity extends AppCompatActivity {
         expandableButton = (AllAngleExpandableButton) findViewById(R.id.button_expandable);
         mExplosionField = ExplosionField.attach2Window(this);
         initExpandableButton();
-//        //设置浮动按钮的点击事件
-//        snakeMenu = (RelativeLayoutWithSnakeMenu) findViewById(R.id.relative_layout);
-//        snakeMenu.setMenuListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                Toast.makeText(MainActivity.this, "menu click", Toast.LENGTH_LONG).show();
-//            }
-//        });
+
     }
 
     private void initExpandableButton() {
