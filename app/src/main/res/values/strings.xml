@@ -1,3 +1,10 @@
 <resources>
     <string name="app_name">PhotoValley</string>
+    <string name="need_permission">使用本功能需要权限,请授予权限</string>
+    <string name="denied_permission">拒绝权限将无使用本功能,请前往设置页面授予权限</string>
+    <string name="setting">设置</string>
+    <string name="cancel">取消</string>
+    <string name="yes">允许</string>
+    <string name="no">拒绝</string>
+    <string name="show">显示</string>
 </resources>
