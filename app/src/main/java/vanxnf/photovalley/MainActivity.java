@@ -38,10 +38,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-
-import tangxiaolv.com.library.EffectiveShapeView;
 import tyrantgit.explosionfield.ExplosionField;
 import vanxnf.photovalley.Util.Utility;
+import vanxnf.photovalley.View.CircleImageView;
 
 import static com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions.withCrossFade;
 
@@ -57,11 +56,11 @@ public class MainActivity extends AppCompatActivity {
 
     private ExplosionField mExplosionField;
 
-    private EffectiveShapeView lastImage;
+    private CircleImageView lastImage;
 
-    private EffectiveShapeView takePhoto;
+    private CircleImageView takePhoto;
 
-    private EffectiveShapeView chooseFromAlbum;
+    private CircleImageView chooseFromAlbum;
 
     private AllAngleExpandableButton expandableButton;
 
@@ -74,9 +73,9 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         Utility.setStatusBarTransparent(getWindow());
         setContentView(R.layout.activity_main);
-        lastImage = (EffectiveShapeView) findViewById(R.id.last_image);
-        takePhoto = (EffectiveShapeView) findViewById(R.id.take_photo);
-        chooseFromAlbum = (EffectiveShapeView) findViewById(R.id.choose_from_album);
+        lastImage = (CircleImageView) findViewById(R.id.last_image);
+        takePhoto = (CircleImageView) findViewById(R.id.take_photo);
+        chooseFromAlbum = (CircleImageView) findViewById(R.id.choose_from_album);
         expandableButton = (AllAngleExpandableButton) findViewById(R.id.button_expandable);
         bottomSheetLayout = (BottomSheetLayout) findViewById(R.id.bottomsheet);
         bottomSheetLayout.setPeekOnDismiss(true);
@@ -111,11 +110,11 @@ public class MainActivity extends AppCompatActivity {
         Utility.reSetView(takePhoto);
         Utility.reSetView(chooseFromAlbum);
         //最后编辑图片
-        lastImage = (EffectiveShapeView) findViewById(R.id.last_image);
+        lastImage = (CircleImageView) findViewById(R.id.last_image);
         lastImage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // TODO: 2018/3/1 点击图片跳转图片编辑页面
+                // TODO: 2018/3/4 获取缓存，设定图片本身显示
                 Intent intent = new Intent(MainActivity.this, EditActivity.class);
                 startActivity(intent, ActivityOptions.makeSceneTransitionAnimation(MainActivity.this).toBundle());
             }
@@ -125,7 +124,6 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 mExplosionField.explode(v);
-                // TODO: 2018/3/2 跳转相机
                 openCamera();
             }
         });
@@ -151,13 +149,12 @@ public class MainActivity extends AppCompatActivity {
             public void onButtonClicked(int i) {
                 switch (i) {
                     case 1:
-                        // TODO: 2018/3/2  设置image不可见
+                        // TODO: 2018/3/4 删除上次图片缓存
                         mExplosionField.explode(lastImage);
                         lastImage.setVisibility(View.GONE);
                         break;
                     case 2:
-                        //还原image
-                        // TODO: 2018/3/2 还原删除操作
+                        // TODO: 2018/3/4 继续上次编辑
                         Utility.reSetView(lastImage);
                         lastImage.setVisibility(View.VISIBLE);
                         break;
@@ -199,7 +196,7 @@ public class MainActivity extends AppCompatActivity {
                         sendBroadcast(mediaScanIntent);
 
                         Intent intent = new Intent(this, EditActivity.class);
-                        intent.putExtra("photo", tookPhoto.toString());
+                        intent.putExtra("image", tookPhoto.toString());
                         startActivity(intent);
                     } else {
                         genericError();

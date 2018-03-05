@@ -20,6 +20,10 @@
             </intent-filter>
         </activity>
         <activity android:name=".EditActivity" />
+        <activity
+            android:name="com.yalantis.ucrop.UCropActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar"/>
         <provider
             android:name="android.support.v4.content.FileProvider"
             android:authorities="vanxnf.photovalley.fileprovider"
