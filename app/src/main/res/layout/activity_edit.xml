@@ -10,18 +10,11 @@
 
     <com.shizhefei.view.largeimage.LargeImageView
         android:id="@+id/large_image_view"
-        android:scrollbars="vertical|horizontal"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="0dp"
+        android:layout_weight="5"
+        android:scrollbars="vertical|horizontal" />
 
-
-    <!--<ImageView-->
-        <!--android:id="@+id/image_edit"-->
-        <!--android:layout_width="wrap_content"-->
-        <!--android:layout_height="0dp"-->
-        <!--android:layout_margin="30dp"-->
-        <!--android:layout_weight="4"-->
-        <!--android:layout_gravity="center" />-->
 
     <android.support.v7.widget.CardView
         android:layout_width="match_parent"
@@ -29,13 +22,14 @@
         android:layout_weight="1"
         android:background="@color/brown">
 
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:text="Edit"
-            android:layout_gravity="center"
-            android:gravity="center"
-            android:textSize="20sp"/>
+        <ImageView
+            android:id="@+id/test0"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+        <vanxnf.photovalley.View.CircleImageView
+            android:id="@+id/test1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
         <!--<ScrollView-->
             <!--android:layout_width="match_parent"-->
             <!--android:layout_height="match_parent">-->

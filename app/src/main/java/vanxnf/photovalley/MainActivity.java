@@ -6,19 +6,16 @@ import android.app.Activity;
 import android.app.ActivityOptions;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
-import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.design.widget.BottomSheetBehavior;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
-import android.support.v4.content.FileProvider;
 import android.support.v7.app.AppCompatActivity;
-import android.telecom.Call;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
@@ -27,11 +24,15 @@ import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
+import com.bumptech.glide.request.target.SimpleTarget;
+import com.bumptech.glide.request.target.ViewTarget;
+import com.bumptech.glide.request.transition.Transition;
 import com.fangxu.allangleexpandablebutton.AllAngleExpandableButton;
 import com.fangxu.allangleexpandablebutton.ButtonData;
 import com.fangxu.allangleexpandablebutton.ButtonEventListener;
 import com.flipboard.bottomsheet.BottomSheetLayout;
 import com.flipboard.bottomsheet.commons.ImagePickerSheetView;
+import com.shizhefei.view.largeimage.LargeImageView;
 
 import java.io.File;
 import java.io.IOException;
@@ -47,26 +48,19 @@ import static com.bumptech.glide.load.resource.drawable.DrawableTransitionOption
 public class MainActivity extends AppCompatActivity {
 
     public static final int TAKE_PHOTO = 0x10;
-
-    public static final int CHOOSE_PHOTO = 0x11;
-
-    private static final int ALBUM_PERMISSION = 0x12;
-
+    public static final int CHOOSE_PHOTO_FROM_ALBUM = 0x11;
+    public static final int EDIT_IMAGE = 0x12;
+    private static final int CAMERA_PERMISSION = 0x13;
+    private static final int ALBUM_PERMISSION = 0x14;
     private TextView LuckyText;
-
     private ExplosionField mExplosionField;
-
     private CircleImageView lastImage;
-
     private CircleImageView takePhoto;
-
     private CircleImageView chooseFromAlbum;
-
     private AllAngleExpandableButton expandableButton;
-
     private Uri imageUri;
-
     private BottomSheetLayout bottomSheetLayout;
+    private ViewTarget viewTarget;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -82,27 +76,6 @@ public class MainActivity extends AppCompatActivity {
         mExplosionField = ExplosionField.attach2Window(this);
         initExpandableButton();
     }
-
-    private void initExpandableButton() {
-        //start angle 90 end angle 180
-        final List<ButtonData> buttonDatas = new ArrayList<>();
-        int[] drawable = {R.drawable.home, R.drawable.fab_delete, R.drawable.fab_revert, R.drawable.fab_setting};
-        int[] color = {R.color.background, R.color.red, R.color.brown, R.color.orange};
-        for (int i = 0; i < 4; i++) {
-            ButtonData buttonData;
-            if (i == 0) {
-                buttonData = ButtonData.buildIconButton(this, drawable[i], 15);
-            } else {
-                buttonData = ButtonData.buildIconButton(this, drawable[i], 0);
-            }
-            buttonData.setBackgroundColorId(this, color[i]);
-            buttonDatas.add(buttonData);
-
-        }
-        expandableButton.setButtonDatas(buttonDatas);
-
-    }
-
 
     @Override
     protected void onResume() {
@@ -124,7 +97,14 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 mExplosionField.explode(v);
-                openCamera();
+                if (ContextCompat.checkSelfPermission(MainActivity.this,
+                        Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+                    ActivityCompat.requestPermissions(MainActivity.this,
+                            new String[]{Manifest.permission.CAMERA},CAMERA_PERMISSION);
+                } else {
+                    openCamera();
+                }
+
             }
         });
         //从相册选择
@@ -135,7 +115,7 @@ public class MainActivity extends AppCompatActivity {
                 if (ContextCompat.checkSelfPermission(MainActivity.this,
                         Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
                     ActivityCompat.requestPermissions(MainActivity.this,
-                            new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},ALBUM_PERMISSION);
+                            new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},CAMERA_PERMISSION);
                 } else {
                     openAlbum();
                 }
@@ -189,21 +169,22 @@ public class MainActivity extends AppCompatActivity {
         switch (requestCode) {
             case TAKE_PHOTO:
                 if (resultCode == RESULT_OK && data != null) {
-                    Uri tookPhoto = imageUri;
+                    final Uri tookPhoto = imageUri;
                     if (tookPhoto != null) {
-                        Intent mediaScanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
-                        mediaScanIntent.setData(imageUri);
-                        sendBroadcast(mediaScanIntent);
-
+                        // TODO: 2018/3/5 完成拍照后及时更新系统相册 
+                        Intent broadcastIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
+                        broadcastIntent.setData(imageUri);
+                        this.sendBroadcast(broadcastIntent);
+                        Log.d("Result", "Photo");
                         Intent intent = new Intent(this, EditActivity.class);
                         intent.putExtra("image", tookPhoto.toString());
-                        startActivity(intent);
+                        startActivityForResult(intent,EDIT_IMAGE);
                     } else {
-                        genericError();
+                        genericError(null);
                     }
                 }
                 break;
-            case CHOOSE_PHOTO:
+            case CHOOSE_PHOTO_FROM_ALBUM:
                 if (resultCode == Activity.RESULT_OK && data != null) {
                     Uri selectedImage = null;
                     selectedImage = data.getData();
@@ -211,14 +192,67 @@ public class MainActivity extends AppCompatActivity {
                     if (selectedImage != null) {
                         Intent intent = new Intent(MainActivity.this, EditActivity.class);
                         intent.putExtra("image", selectedImage.toString());
-                        startActivity(intent);
+                        startActivityForResult(intent,EDIT_IMAGE);
                     } else {
-                        genericError();
+                        genericError(null);
                     }
+                }
+                break;
+            case EDIT_IMAGE:
+                if (resultCode == Activity.RESULT_OK && data != null) {
+                    String s = data.getStringExtra("data_return");
+                    Glide.with(this).load(Uri.parse(s)).into(new SimpleTarget<Drawable>() {
+                        @Override
+                        public void onResourceReady(@NonNull Drawable resource, @Nullable Transition<? super Drawable> transition) {
+                            lastImage.setImageDrawable(resource);
+                        }
+                    });
                 }
                 break;
             default:
         }
+    }
+
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        switch (requestCode) {
+            case ALBUM_PERMISSION:
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    openAlbum();
+                } else {
+                    Toast.makeText(this, getString(R.string.denied_permission), Toast.LENGTH_SHORT).show();
+                }
+                break;
+            case CAMERA_PERMISSION:
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    openCamera();
+                } else {
+                    Toast.makeText(this, getString(R.string.denied_permission), Toast.LENGTH_SHORT).show();
+                }
+                break;
+            default:
+        }
+    }
+
+    private void initExpandableButton() {
+        //start angle 90 end angle 180
+        final List<ButtonData> buttonDatas = new ArrayList<>();
+        int[] drawable = {R.drawable.home, R.drawable.fab_delete, R.drawable.fab_revert, R.drawable.fab_setting};
+        int[] color = {R.color.background, R.color.red, R.color.brown, R.color.orange};
+        for (int i = 0; i < 4; i++) {
+            ButtonData buttonData;
+            if (i == 0) {
+                buttonData = ButtonData.buildIconButton(this, drawable[i], 15);
+            } else {
+                buttonData = ButtonData.buildIconButton(this, drawable[i], 0);
+            }
+            buttonData.setBackgroundColorId(this, color[i]);
+            buttonDatas.add(buttonData);
+
+        }
+        expandableButton.setButtonDatas(buttonDatas);
+
     }
 
     private void openCamera() {
@@ -234,35 +268,12 @@ public class MainActivity extends AppCompatActivity {
                 intent.putExtra(MediaStore.EXTRA_OUTPUT, imageUri);
                 startActivityForResult(intent, TAKE_PHOTO);
             } catch (IOException e) {
-                genericError("Could not create imageFile for camera");
                 e.printStackTrace();
             }
         }
-
-
     }
 
     private void openAlbum() {
-        // TODO: 2018/3/3 自定义相册或跳转系统相册
-        showSheetView();
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        switch (requestCode) {
-            case ALBUM_PERMISSION:
-                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    openAlbum();
-                } else {
-                    Toast.makeText(this, getString(R.string.denied_permission), Toast.LENGTH_SHORT).show();
-                }
-                break;
-            default:
-                super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        }
-    }
-
-    private void showSheetView() {
         ImagePickerSheetView sheetView = new ImagePickerSheetView.Builder(this)
                 .setMaxItems(59)
                 .setShowCameraOption(false)
@@ -284,13 +295,13 @@ public class MainActivity extends AppCompatActivity {
                     public void onTileSelected(ImagePickerSheetView.ImagePickerTile selectedTile) {
                         bottomSheetLayout.dismissSheet();
                         if (selectedTile.isPickerTile()) {
-                            startActivityForResult(createPickIntent(), CHOOSE_PHOTO);
+                            startActivityForResult(createPickIntent(), CHOOSE_PHOTO_FROM_ALBUM);
                         } else if (selectedTile.isImageTile()) {
                             Intent intent = new Intent(MainActivity.this, EditActivity.class);
                             intent.putExtra("image", selectedTile.getImageUri().toString());
-                            startActivity(intent);
+                            startActivityForResult(intent,EDIT_IMAGE);
                         } else {
-                            genericError();
+                            genericError(null);
                         }
                     }
                 })
@@ -308,10 +319,6 @@ public class MainActivity extends AppCompatActivity {
         } else {
             return null;
         }
-    }
-
-    private void genericError() {
-        genericError(null);
     }
 
     private void genericError(String message) {

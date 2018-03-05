@@ -2,6 +2,7 @@ package vanxnf.photovalley.Util;
 
 
 
+import android.content.ContentValues;
 import android.content.Context;
 
 import android.graphics.Color;
@@ -10,6 +11,7 @@ import android.os.Build;
 
 import android.os.Environment;
 import android.os.storage.StorageManager;
+import android.provider.MediaStore;
 import android.support.v4.content.FileProvider;
 import android.util.Log;
 import android.view.View;
@@ -64,11 +66,13 @@ public class Utility {
         // Create an image file name
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(new Date());
         String imageFileName = "JPEG_" + timeStamp + "_.jpg";
+
         File cameraImageFile = new File(Environment.getExternalStorageDirectory().getAbsolutePath()
                 + "/Pictures/Valley/" + imageFileName);
         cameraImageFile.getParentFile().mkdirs();
         return cameraImageFile;
     }
+
 
 
 }
