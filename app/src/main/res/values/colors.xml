@@ -3,6 +3,8 @@
     <color name="colorPrimary">#F44336</color>
     <color name="colorPrimaryDark">#D32F2F</color>
     <color name="colorAccent">#FF9800</color>
+    <color name="text_gray">#8C000000</color>
+    <color name="divider_gray">#AAe2e2e2</color>
     <color name="background">#1E1118</color>
     <color name="brown">#9E5238</color>
     <color name="darkBlue">#1B5690</color>

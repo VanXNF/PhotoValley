@@ -27,7 +27,6 @@ dependencies {
     implementation 'com.github.uin3566:AllAngleExpandableButton:v1.2.0'
     implementation 'tyrantgit:explosionfield:1.0.1'
     implementation 'com.flipboard:bottomsheet-core:1.5.3'
-    implementation 'com.flipboard:bottomsheet-commons:1.5.3'
     implementation 'com.github.bumptech.glide:glide:4.6.1'
     implementation 'com.github.florent37:glidepalette:2.1.2'
     implementation 'jp.wasabeef:glide-transformations:3.1.1'

@@ -6,7 +6,6 @@ import android.app.Activity;
 import android.app.ActivityOptions;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
@@ -16,7 +15,6 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -31,8 +29,6 @@ import com.fangxu.allangleexpandablebutton.AllAngleExpandableButton;
 import com.fangxu.allangleexpandablebutton.ButtonData;
 import com.fangxu.allangleexpandablebutton.ButtonEventListener;
 import com.flipboard.bottomsheet.BottomSheetLayout;
-import com.flipboard.bottomsheet.commons.ImagePickerSheetView;
-import com.shizhefei.view.largeimage.LargeImageView;
 
 import java.io.File;
 import java.io.IOException;
@@ -42,6 +38,7 @@ import java.util.List;
 import tyrantgit.explosionfield.ExplosionField;
 import vanxnf.photovalley.Util.Utility;
 import vanxnf.photovalley.View.CircleImageView;
+import vanxnf.photovalley.View.ImagePickerSheetView;
 
 import static com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions.withCrossFade;
 
@@ -171,11 +168,11 @@ public class MainActivity extends AppCompatActivity {
                 if (resultCode == RESULT_OK && data != null) {
                     final Uri tookPhoto = imageUri;
                     if (tookPhoto != null) {
-                        // TODO: 2018/3/5 完成拍照后及时更新系统相册 
+                        // TODO: 2018/3/5 需要完成拍照后及时更新系统相册
                         Intent broadcastIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
                         broadcastIntent.setData(imageUri);
                         this.sendBroadcast(broadcastIntent);
-                        Log.d("Result", "Photo");
+
                         Intent intent = new Intent(this, EditActivity.class);
                         intent.putExtra("image", tookPhoto.toString());
                         startActivityForResult(intent,EDIT_IMAGE);
@@ -188,11 +185,12 @@ public class MainActivity extends AppCompatActivity {
                 if (resultCode == Activity.RESULT_OK && data != null) {
                     Uri selectedImage = null;
                     selectedImage = data.getData();
-
-                    if (selectedImage != null) {
+                    if (selectedImage != null ) {
+                        // TODO: 2018/3/6 需要添加判断图片是否为gif
                         Intent intent = new Intent(MainActivity.this, EditActivity.class);
                         intent.putExtra("image", selectedImage.toString());
                         startActivityForResult(intent,EDIT_IMAGE);
+
                     } else {
                         genericError(null);
                     }

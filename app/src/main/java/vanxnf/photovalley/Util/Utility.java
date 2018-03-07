@@ -5,12 +5,14 @@ package vanxnf.photovalley.Util;
 import android.content.ContentValues;
 import android.content.Context;
 
+import android.database.Cursor;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Build;
 
 import android.os.Environment;
 import android.os.storage.StorageManager;
+import android.provider.DocumentsContract;
 import android.provider.MediaStore;
 import android.support.v4.content.FileProvider;
 import android.util.Log;
@@ -19,6 +21,8 @@ import android.view.Window;
 import android.view.WindowManager;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -54,7 +58,7 @@ public class Utility {
         Uri uri;
         if (Build.VERSION.SDK_INT >= 24) {
            uri = FileProvider.getUriForFile(context, authority, file);
-            Log.d("MainActivity", uri.toString());
+            Log.d("Test0", uri.toString());
         } else {
            uri = Uri.fromFile(file);
         }
@@ -65,14 +69,34 @@ public class Utility {
     public static File createImageFile() throws IOException {
         // Create an image file name
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(new Date());
-        String imageFileName = "JPEG_" + timeStamp + "_.jpg";
-
-        File cameraImageFile = new File(Environment.getExternalStorageDirectory().getAbsolutePath()
+        String imageFileName = "IMG_" + timeStamp + "_.jpg";
+        String path = new String(Environment.getExternalStorageDirectory().getAbsolutePath()
                 + "/Pictures/Valley/" + imageFileName);
+        Log.d("File_Path", path);
+        File cameraImageFile = new File(path);
         cameraImageFile.getParentFile().mkdirs();
         return cameraImageFile;
     }
-
-
-
+    /**判断文件是否为gif*/
+    public static boolean isGifFile(File file) {
+        try {
+            FileInputStream inputStream = new FileInputStream(file);
+            int[] flags = new int[5];
+            flags[0] = inputStream.read();
+            flags[1] = inputStream.read();
+            flags[2] = inputStream.read();
+            flags[3] = inputStream.read();
+            inputStream.skip(inputStream.available() - 1);
+            flags[4] = inputStream.read();
+            inputStream.close();
+            return flags[0] == 71 && flags[1] == 73 && flags[2] == 70 && flags[3] == 56 && flags[4] == 0x3B;
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
 }
