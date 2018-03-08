@@ -1,4 +1,4 @@
-package vanxnf.photovalley.View;
+package vanxnf.photovalley.widget;
 
 import android.content.Context;
 import android.content.res.TypedArray;

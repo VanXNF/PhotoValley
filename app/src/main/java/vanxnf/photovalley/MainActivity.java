@@ -5,10 +5,12 @@ import android.Manifest;
 import android.app.Activity;
 import android.app.ActivityOptions;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -23,7 +25,6 @@ import android.widget.Toast;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.SimpleTarget;
-import com.bumptech.glide.request.target.ViewTarget;
 import com.bumptech.glide.request.transition.Transition;
 import com.fangxu.allangleexpandablebutton.AllAngleExpandableButton;
 import com.fangxu.allangleexpandablebutton.ButtonData;
@@ -31,14 +32,14 @@ import com.fangxu.allangleexpandablebutton.ButtonEventListener;
 import com.flipboard.bottomsheet.BottomSheetLayout;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 import tyrantgit.explosionfield.ExplosionField;
 import vanxnf.photovalley.Util.Utility;
-import vanxnf.photovalley.View.CircleImageView;
-import vanxnf.photovalley.View.ImagePickerSheetView;
+import vanxnf.photovalley.widget.CircleImageView;
+import vanxnf.photovalley.features.imagepickersheet.ImagePickerSheetView;
+import vanxnf.photovalley.features.albumpicker.AlbumPickerActivity;
 
 import static com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions.withCrossFade;
 
@@ -46,9 +47,9 @@ public class MainActivity extends AppCompatActivity {
 
     public static final int TAKE_PHOTO = 0x10;
     public static final int CHOOSE_PHOTO_FROM_ALBUM = 0x11;
-    public static final int EDIT_IMAGE = 0x12;
-    private static final int CAMERA_PERMISSION = 0x13;
-    private static final int ALBUM_PERMISSION = 0x14;
+    private static final int CAMERA_PERMISSION = 0x12;
+    private static final int ALBUM_PERMISSION = 0x13;
+    public static boolean isDelete = true;
     private TextView LuckyText;
     private ExplosionField mExplosionField;
     private CircleImageView lastImage;
@@ -57,7 +58,10 @@ public class MainActivity extends AppCompatActivity {
     private AllAngleExpandableButton expandableButton;
     private Uri imageUri;
     private BottomSheetLayout bottomSheetLayout;
-    private ViewTarget viewTarget;
+    private SharedPreferences preferences;
+    private String lastEditedImage;
+    private File cameraImage = null;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,6 +76,7 @@ public class MainActivity extends AppCompatActivity {
         bottomSheetLayout.setPeekOnDismiss(true);
         mExplosionField = ExplosionField.attach2Window(this);
         initExpandableButton();
+
     }
 
     @Override
@@ -79,14 +84,28 @@ public class MainActivity extends AppCompatActivity {
         super.onResume();
         Utility.reSetView(takePhoto);
         Utility.reSetView(chooseFromAlbum);
+        preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        lastEditedImage = preferences.getString("last_edit_image", null);
+        if (lastEditedImage != null && !isDelete) {
+            lastImage.setVisibility(View.VISIBLE);
+            Glide.with(this).load(Uri.parse(lastEditedImage)).into(new SimpleTarget<Drawable>() {
+                @Override
+                public void onResourceReady(@NonNull Drawable resource, @Nullable Transition<? super Drawable> transition) {
+                    lastImage.setImageDrawable(resource);
+                }
+            });
+        }
+
         //最后编辑图片
-        lastImage = (CircleImageView) findViewById(R.id.last_image);
         lastImage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // TODO: 2018/3/4 获取缓存，设定图片本身显示
-                Intent intent = new Intent(MainActivity.this, EditActivity.class);
-                startActivity(intent, ActivityOptions.makeSceneTransitionAnimation(MainActivity.this).toBundle());
+                if (lastEditedImage != null) {
+                    Intent intent = new Intent(MainActivity.this, EditActivity.class);
+                    intent.putExtra("image", lastEditedImage);
+                    startActivity(intent, ActivityOptions.makeSceneTransitionAnimation(MainActivity.this).toBundle());
+                }
+
             }
         });
         //拍照
@@ -127,13 +146,26 @@ public class MainActivity extends AppCompatActivity {
                 switch (i) {
                     case 1:
                         // TODO: 2018/3/4 删除上次图片缓存
-                        mExplosionField.explode(lastImage);
-                        lastImage.setVisibility(View.GONE);
+                        if (!isDelete) {
+                            mExplosionField.explode(lastImage);
+//                            lastImage.setVisibility(View.GONE);
+                            isDelete = true;
+                        } else {
+                            Toast.makeText(MainActivity.this,"The cache was deleted", Toast.LENGTH_SHORT).show();
+                        }
                         break;
                     case 2:
                         // TODO: 2018/3/4 继续上次编辑
-                        Utility.reSetView(lastImage);
-                        lastImage.setVisibility(View.VISIBLE);
+                        if (!isDelete) {
+                            if (lastEditedImage != null) {
+                                Intent intent = new Intent(MainActivity.this, EditActivity.class);
+                                intent.putExtra("image", lastEditedImage);
+                                startActivity(intent);
+                            }
+                        } else {
+                            Toast.makeText(MainActivity.this,"The cache was deleted", Toast.LENGTH_SHORT).show();
+                        }
+
                         break;
                     case 3:
                         // TODO: 2018/3/2 设置界面 引导界面
@@ -168,43 +200,27 @@ public class MainActivity extends AppCompatActivity {
                 if (resultCode == RESULT_OK && data != null) {
                     final Uri tookPhoto = imageUri;
                     if (tookPhoto != null) {
-                        // TODO: 2018/3/5 需要完成拍照后及时更新系统相册
-                        Intent broadcastIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
-                        broadcastIntent.setData(imageUri);
-                        this.sendBroadcast(broadcastIntent);
-
+                        notifyMediaUpdate(cameraImage);
                         Intent intent = new Intent(this, EditActivity.class);
                         intent.putExtra("image", tookPhoto.toString());
-                        startActivityForResult(intent,EDIT_IMAGE);
+                        startActivity(intent);
                     } else {
                         genericError(null);
                     }
                 }
                 break;
             case CHOOSE_PHOTO_FROM_ALBUM:
+                //从相册选择图片
                 if (resultCode == Activity.RESULT_OK && data != null) {
-                    Uri selectedImage = null;
-                    selectedImage = data.getData();
-                    if (selectedImage != null ) {
-                        // TODO: 2018/3/6 需要添加判断图片是否为gif
+                    String result = data.getStringExtra(AlbumPickerActivity.SELECT_RESULTS);
+                    if (result != null ) {
+                        Uri selectedImage = Uri.parse(result);
                         Intent intent = new Intent(MainActivity.this, EditActivity.class);
                         intent.putExtra("image", selectedImage.toString());
-                        startActivityForResult(intent,EDIT_IMAGE);
-
+                        startActivity(intent);
                     } else {
                         genericError(null);
                     }
-                }
-                break;
-            case EDIT_IMAGE:
-                if (resultCode == Activity.RESULT_OK && data != null) {
-                    String s = data.getStringExtra("data_return");
-                    Glide.with(this).load(Uri.parse(s)).into(new SimpleTarget<Drawable>() {
-                        @Override
-                        public void onResourceReady(@NonNull Drawable resource, @Nullable Transition<? super Drawable> transition) {
-                            lastImage.setImageDrawable(resource);
-                        }
-                    });
                 }
                 break;
             default:
@@ -256,18 +272,14 @@ public class MainActivity extends AppCompatActivity {
     private void openCamera() {
         Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
-            try {
-                File cameraImage = null;
-                cameraImage = Utility.createImageFile();
-                imageUri = Utility.getFileUri(MainActivity.this,
-                        "vanxnf.photovalley.fileprovider", cameraImage);
-                Intent intent = new Intent("android.media.action.IMAGE_CAPTURE");
-                intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-                intent.putExtra(MediaStore.EXTRA_OUTPUT, imageUri);
-                startActivityForResult(intent, TAKE_PHOTO);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            cameraImage = Utility.createImageFile();
+            imageUri = Utility.getFileUri(MainActivity.this,
+                    "vanxnf.photovalley.fileprovider", cameraImage);
+            Intent intent = new Intent("android.media.action.IMAGE_CAPTURE");
+            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            intent.putExtra(MediaStore.EXTRA_OUTPUT, imageUri);
+            startActivityForResult(intent, TAKE_PHOTO);
+
         }
     }
 
@@ -275,7 +287,7 @@ public class MainActivity extends AppCompatActivity {
         ImagePickerSheetView sheetView = new ImagePickerSheetView.Builder(this)
                 .setMaxItems(59)
                 .setShowCameraOption(false)
-                .setShowPickerOption(createPickIntent() != null)
+                .setShowPickerOption(true)
                 .setImageProvider(new ImagePickerSheetView.ImageProvider() {
                     @Override
                     public void onProvideImage(ImageView imageView, Uri imageUri, int size) {
@@ -292,12 +304,13 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void onTileSelected(ImagePickerSheetView.ImagePickerTile selectedTile) {
                         bottomSheetLayout.dismissSheet();
+
                         if (selectedTile.isPickerTile()) {
-                            startActivityForResult(createPickIntent(), CHOOSE_PHOTO_FROM_ALBUM);
+                            startActivityForResult(new Intent(MainActivity.this, AlbumPickerActivity.class), CHOOSE_PHOTO_FROM_ALBUM);
                         } else if (selectedTile.isImageTile()) {
                             Intent intent = new Intent(MainActivity.this, EditActivity.class);
                             intent.putExtra("image", selectedTile.getImageUri().toString());
-                            startActivityForResult(intent,EDIT_IMAGE);
+                            startActivity(intent);
                         } else {
                             genericError(null);
                         }
@@ -309,14 +322,11 @@ public class MainActivity extends AppCompatActivity {
         bottomSheetLayout.showWithSheetView(sheetView);
     }
 
-    @Nullable
-    private Intent createPickIntent() {
-        Intent picImageIntent = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-        if (picImageIntent.resolveActivity(getPackageManager()) != null) {
-            return picImageIntent;
-        } else {
-            return null;
-        }
+    public void notifyMediaUpdate(File file) {
+        Intent mediaScanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
+        Uri contentUri = Uri.fromFile(file);
+        mediaScanIntent.setData(contentUri);
+        sendBroadcast(mediaScanIntent);
     }
 
     private void genericError(String message) {

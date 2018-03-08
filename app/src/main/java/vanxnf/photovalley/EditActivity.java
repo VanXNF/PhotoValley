@@ -1,40 +1,29 @@
 package vanxnf.photovalley;
 
-import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
-import android.media.Image;
-import android.net.Uri;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
-import android.view.View;
-import android.widget.ImageView;
 import com.bumptech.glide.Glide;
-import com.bumptech.glide.request.target.SimpleTarget;
 import com.bumptech.glide.request.target.ViewTarget;
 import com.bumptech.glide.request.transition.Transition;
 import com.shizhefei.view.largeimage.LargeImageView;
 
 import vanxnf.photovalley.Util.Utility;
-import vanxnf.photovalley.View.CircleImageView;
 
 
 public class EditActivity extends AppCompatActivity {
 
-    private ImageView editImage;
-
-    private Uri imageUri;
-
     private String image;
 
     private ViewTarget viewTarget;
-    private ImageView imageView;
-    private CircleImageView circleImageView;
 
     private LargeImageView largeImageView;
+
+    private SharedPreferences preferences;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -43,31 +32,18 @@ public class EditActivity extends AppCompatActivity {
         setContentView(R.layout.activity_edit);
         image = getIntent().getStringExtra("image");
         largeImageView = (LargeImageView) findViewById( R.id.large_image_view);
+        preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        SharedPreferences.Editor editor = preferences.edit();
+        editor.putString("last_edit_image", image);
+        editor.apply();
+        MainActivity.isDelete = false;
         loadLargeImageViewTarget();
 
-        largeImageView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent();
-                intent.putExtra("data_return", image);
-                setResult(RESULT_OK,intent);
-                Log.d("Result", "send success");
-            }
-        });
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-        Intent intent = new Intent();
-        intent.putExtra("data_return", image);
-        setResult(RESULT_OK,intent);
     }
 
     private void loadLargeImageViewTarget() {

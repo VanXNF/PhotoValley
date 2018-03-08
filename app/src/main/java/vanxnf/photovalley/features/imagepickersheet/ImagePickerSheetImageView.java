@@ -1,4 +1,4 @@
-package vanxnf.photovalley.View;
+package vanxnf.photovalley.features.imagepickersheet;
 
 import android.content.Context;
 import android.support.v7.widget.AppCompatImageView;
@@ -20,8 +20,6 @@ final class ImagePickerSheetImageView extends AppCompatImageView {
     public ImagePickerSheetImageView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
     }
-
-
 
     @SuppressWarnings("UnnecessaryLocalVariable")
     @Override

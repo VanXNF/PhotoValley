@@ -1,4 +1,4 @@
-package vanxnf.photovalley.View;
+package vanxnf.photovalley.features.imagepickersheet;
 
 import android.annotation.TargetApi;
 import android.content.Context;

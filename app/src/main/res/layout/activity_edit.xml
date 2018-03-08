@@ -26,7 +26,7 @@
             android:id="@+id/test0"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
-        <vanxnf.photovalley.View.CircleImageView
+        <vanxnf.photovalley.widget.CircleImageView
             android:id="@+id/test1"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />

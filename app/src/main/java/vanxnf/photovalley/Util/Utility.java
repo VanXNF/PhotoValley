@@ -66,17 +66,24 @@ public class Utility {
     }
 
     /**创建相机图片*/
-    public static File createImageFile() throws IOException {
-        // Create an image file name
+    public static File createImageFile() {
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(new Date());
-        String imageFileName = "IMG_" + timeStamp + "_.jpg";
-        String path = new String(Environment.getExternalStorageDirectory().getAbsolutePath()
-                + "/Pictures/Valley/" + imageFileName);
+        String imageFileName = "IMG_" + timeStamp + ".jpg";
+        Log.d("Time", imageFileName);
+        String path = new String(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM).getAbsolutePath()
+              + "/" + imageFileName);
         Log.d("File_Path", path);
-        File cameraImageFile = new File(path);
-        cameraImageFile.getParentFile().mkdirs();
-        return cameraImageFile;
+
+        File file = null;
+        try {
+            file = new File(path);
+            file.getParentFile().mkdirs();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return file;
     }
+
     /**判断文件是否为gif*/
     public static boolean isGifFile(File file) {
         try {

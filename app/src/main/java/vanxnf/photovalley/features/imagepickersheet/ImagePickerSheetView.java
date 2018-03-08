@@ -1,4 +1,4 @@
-package vanxnf.photovalley.View;
+package vanxnf.photovalley.features.imagepickersheet;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
@@ -123,7 +123,7 @@ public class ImagePickerSheetView extends FrameLayout {
          * Indicates whether or not this represents an image tile option. If it is, you can safely
          * retrieve the represented image's file Uri via {@link #getImageUri()}
          *
-         * @return True if this is a camera option, false if not.
+         * @return True if this is a image option, false if not.
          */
         public boolean isImageTile() {
             return tileType == IMAGE;
