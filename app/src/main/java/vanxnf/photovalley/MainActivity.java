@@ -36,7 +36,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import tyrantgit.explosionfield.ExplosionField;
-import vanxnf.photovalley.Util.Utility;
+import vanxnf.photovalley.utils.Utility;
 import vanxnf.photovalley.widget.CircleImageView;
 import vanxnf.photovalley.features.imagepickersheet.ImagePickerSheetView;
 import vanxnf.photovalley.features.albumpicker.AlbumPickerActivity;
@@ -86,8 +86,9 @@ public class MainActivity extends AppCompatActivity {
         Utility.reSetView(chooseFromAlbum);
         preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         lastEditedImage = preferences.getString("last_edit_image", null);
-        if (lastEditedImage != null && !isDelete) {
-            lastImage.setVisibility(View.VISIBLE);
+        if (lastEditedImage != null) {
+             isDelete = false;
+             Utility.reSetView(lastImage);
             Glide.with(this).load(Uri.parse(lastEditedImage)).into(new SimpleTarget<Drawable>() {
                 @Override
                 public void onResourceReady(@NonNull Drawable resource, @Nullable Transition<? super Drawable> transition) {
@@ -108,6 +109,7 @@ public class MainActivity extends AppCompatActivity {
 
             }
         });
+
         //拍照
         takePhoto.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -148,7 +150,10 @@ public class MainActivity extends AppCompatActivity {
                         // TODO: 2018/3/4 删除上次图片缓存
                         if (!isDelete) {
                             mExplosionField.explode(lastImage);
-//                            lastImage.setVisibility(View.GONE);
+                            lastImage.setVisibility(View.GONE);
+                            SharedPreferences.Editor editor = preferences.edit();
+                            editor.clear();
+                            editor.apply();
                             isDelete = true;
                         } else {
                             Toast.makeText(MainActivity.this,"The cache was deleted", Toast.LENGTH_SHORT).show();

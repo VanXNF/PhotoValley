@@ -1,19 +1,14 @@
-package vanxnf.photovalley.Util;
+package vanxnf.photovalley.utils;
 
 
 
-import android.content.ContentValues;
 import android.content.Context;
 
-import android.database.Cursor;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Build;
 
 import android.os.Environment;
-import android.os.storage.StorageManager;
-import android.provider.DocumentsContract;
-import android.provider.MediaStore;
 import android.support.v4.content.FileProvider;
 import android.util.Log;
 import android.view.View;
@@ -51,6 +46,7 @@ public class Utility {
         view.setScaleX(1);
         view.setScaleY(1);
         view.setAlpha(1.0f);
+        view.setVisibility(View.VISIBLE);
     }
 
     /**获取文件Uri*/

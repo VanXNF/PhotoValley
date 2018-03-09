@@ -36,7 +36,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import vanxnf.photovalley.R;
-import vanxnf.photovalley.Util.Utility;
+import vanxnf.photovalley.utils.Utility;
 
 /**
  * A Sheet view for displaying recent images or options to pick or take pictures.

@@ -12,7 +12,7 @@ import com.bumptech.glide.request.target.ViewTarget;
 import com.bumptech.glide.request.transition.Transition;
 import com.shizhefei.view.largeimage.LargeImageView;
 
-import vanxnf.photovalley.Util.Utility;
+import vanxnf.photovalley.utils.Utility;
 
 
 public class EditActivity extends AppCompatActivity {
