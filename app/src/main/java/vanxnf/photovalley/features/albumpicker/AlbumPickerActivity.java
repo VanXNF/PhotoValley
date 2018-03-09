@@ -76,7 +76,7 @@ public class AlbumPickerActivity extends AlbumPickerConfig implements LoaderMana
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_photo_picker);
+        setContentView(R.layout.activity_album_picker);
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         ActionBar actionBar = getSupportActionBar();
@@ -319,7 +319,7 @@ public class AlbumPickerActivity extends AlbumPickerConfig implements LoaderMana
         @Override
         public PhotoVH onCreateViewHolder(ViewGroup parent, int viewType) {
             Context context = parent.getContext();
-            View itemView = LayoutInflater.from(context).inflate(R.layout.photo_img_item, parent, false);
+            View itemView = LayoutInflater.from(context).inflate(R.layout.album_picker_photo_item, parent, false);
             return new PhotoVH(itemView);
         }
 

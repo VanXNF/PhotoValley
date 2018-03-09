@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">PhotoValley</string>
     <string name="need_permission">使用本功能需要权限,请授予权限</string>

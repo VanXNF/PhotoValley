@@ -179,7 +179,7 @@ public class ImagePickerSheetView extends FrameLayout {
     protected boolean showPickerOption = true;
     protected Drawable cameraDrawable = null;
     protected Drawable pickerDrawable = null;
-    protected @LayoutRes int tileLayout = R.layout.sheet_image_grid_item;
+    protected @LayoutRes int tileLayout = R.layout.image_picker_sheet_grid_item;
     protected String title;
     private int columnWidthDp = 100;
 
@@ -187,7 +187,7 @@ public class ImagePickerSheetView extends FrameLayout {
     protected ImagePickerSheetView(final Builder builder) {
         super(builder.context);
 
-        inflate(getContext(), R.layout.grid_sheet_view, this);
+        inflate(getContext(), R.layout.image_picker_sheet_view_grid, this);
 
         // Set up the grid
         tileGrid = (GridView) findViewById(R.id.grid);
@@ -336,7 +336,7 @@ public class ImagePickerSheetView extends FrameLayout {
 
             if (recycled == null) {
                 if (tileLayout == 0) {
-                    thumb = (ImageView) inflater.inflate(R.layout.sheet_image_grid_item, parent, false);
+                    thumb = (ImageView) inflater.inflate(R.layout.image_picker_sheet_grid_item, parent, false);
                 } else {
                     thumb = (ImageView) inflater.inflate(tileLayout, parent, false);
                     if (!(thumb instanceof ImageView)) {

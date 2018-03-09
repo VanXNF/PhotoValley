@@ -19,7 +19,6 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.ImageView;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
@@ -49,18 +48,16 @@ public class MainActivity extends AppCompatActivity {
     public static final int CHOOSE_PHOTO_FROM_ALBUM = 0x11;
     private static final int CAMERA_PERMISSION = 0x12;
     private static final int ALBUM_PERMISSION = 0x13;
-    public static boolean isDelete = true;
-    private TextView LuckyText;
+    private static boolean isDelete = true;
     private ExplosionField mExplosionField;
-    private CircleImageView lastImage;
-    private CircleImageView takePhoto;
-    private CircleImageView chooseFromAlbum;
-    private AllAngleExpandableButton expandableButton;
-    private Uri imageUri;
-    private BottomSheetLayout bottomSheetLayout;
+    private CircleImageView civLastThumbnail;
+    private CircleImageView civTakePhoto;
+    private CircleImageView civChooseFromAlbum;
+    private AllAngleExpandableButton mExpandableButton;
+    private BottomSheetLayout mBottomSheetLayout;
     private SharedPreferences preferences;
-    private String lastEditedImage;
-    private File cameraImage = null;
+    private String mLastEditedImageString;
+    private File mCameraFile = null;
 
 
     @Override
@@ -68,12 +65,12 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         Utility.setStatusBarTransparent(getWindow());
         setContentView(R.layout.activity_main);
-        lastImage = (CircleImageView) findViewById(R.id.last_image);
-        takePhoto = (CircleImageView) findViewById(R.id.take_photo);
-        chooseFromAlbum = (CircleImageView) findViewById(R.id.choose_from_album);
-        expandableButton = (AllAngleExpandableButton) findViewById(R.id.button_expandable);
-        bottomSheetLayout = (BottomSheetLayout) findViewById(R.id.bottomsheet);
-        bottomSheetLayout.setPeekOnDismiss(true);
+        civLastThumbnail = (CircleImageView) findViewById(R.id.last_image);
+        civTakePhoto = (CircleImageView) findViewById(R.id.take_photo);
+        civChooseFromAlbum = (CircleImageView) findViewById(R.id.choose_from_album);
+        mExpandableButton = (AllAngleExpandableButton) findViewById(R.id.button_expandable);
+        mBottomSheetLayout = (BottomSheetLayout) findViewById(R.id.bottomsheet);
+        mBottomSheetLayout.setPeekOnDismiss(true);
         mExplosionField = ExplosionField.attach2Window(this);
         initExpandableButton();
 
@@ -82,28 +79,30 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        Utility.reSetView(takePhoto);
-        Utility.reSetView(chooseFromAlbum);
+        Utility.reSetView(civTakePhoto);
+        Utility.reSetView(civChooseFromAlbum);
         preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-        lastEditedImage = preferences.getString("last_edit_image", null);
-        if (lastEditedImage != null) {
+        mLastEditedImageString = preferences.getString("last_edit_image", null);
+        if (mLastEditedImageString != null) {
              isDelete = false;
-             Utility.reSetView(lastImage);
-            Glide.with(this).load(Uri.parse(lastEditedImage)).into(new SimpleTarget<Drawable>() {
+             Utility.reSetView(civLastThumbnail);
+            Glide.with(this)
+                    .load(Uri.parse(mLastEditedImageString))
+                    .into(new SimpleTarget<Drawable>() {
                 @Override
                 public void onResourceReady(@NonNull Drawable resource, @Nullable Transition<? super Drawable> transition) {
-                    lastImage.setImageDrawable(resource);
+                    civLastThumbnail.setImageDrawable(resource);
                 }
             });
         }
 
         //最后编辑图片
-        lastImage.setOnClickListener(new View.OnClickListener() {
+        civLastThumbnail.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (lastEditedImage != null) {
+                if (mLastEditedImageString != null) {
                     Intent intent = new Intent(MainActivity.this, EditActivity.class);
-                    intent.putExtra("image", lastEditedImage);
+                    intent.putExtra("image", mLastEditedImageString);
                     startActivity(intent, ActivityOptions.makeSceneTransitionAnimation(MainActivity.this).toBundle());
                 }
 
@@ -111,7 +110,7 @@ public class MainActivity extends AppCompatActivity {
         });
 
         //拍照
-        takePhoto.setOnClickListener(new View.OnClickListener() {
+        civTakePhoto.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 mExplosionField.explode(v);
@@ -126,7 +125,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
         //从相册选择
-        chooseFromAlbum.setOnClickListener(new View.OnClickListener() {
+        civChooseFromAlbum.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 mExplosionField.explode(v);
@@ -135,22 +134,21 @@ public class MainActivity extends AppCompatActivity {
                     ActivityCompat.requestPermissions(MainActivity.this,
                             new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},CAMERA_PERMISSION);
                 } else {
-                    openAlbum();
+                    showSheet();
                 }
 
 
             }
         });
         //拓展按钮
-        expandableButton.setButtonEventListener(new ButtonEventListener() {
+        mExpandableButton.setButtonEventListener(new ButtonEventListener() {
             @Override
             public void onButtonClicked(int i) {
                 switch (i) {
                     case 1:
-                        // TODO: 2018/3/4 删除上次图片缓存
                         if (!isDelete) {
-                            mExplosionField.explode(lastImage);
-                            lastImage.setVisibility(View.GONE);
+                            mExplosionField.explode(civLastThumbnail);
+                            civLastThumbnail.setVisibility(View.GONE);
                             SharedPreferences.Editor editor = preferences.edit();
                             editor.clear();
                             editor.apply();
@@ -162,9 +160,9 @@ public class MainActivity extends AppCompatActivity {
                     case 2:
                         // TODO: 2018/3/4 继续上次编辑
                         if (!isDelete) {
-                            if (lastEditedImage != null) {
+                            if (mLastEditedImageString != null) {
                                 Intent intent = new Intent(MainActivity.this, EditActivity.class);
-                                intent.putExtra("image", lastEditedImage);
+                                intent.putExtra("image", mLastEditedImageString);
                                 startActivity(intent);
                             }
                         } else {
@@ -186,12 +184,11 @@ public class MainActivity extends AppCompatActivity {
             public void onCollapse() {}
         });
         //监听弹出菜单状态
-        bottomSheetLayout.addOnSheetStateChangeListener(new BottomSheetLayout.OnSheetStateChangeListener(){
+        mBottomSheetLayout.addOnSheetStateChangeListener(new BottomSheetLayout.OnSheetStateChangeListener(){
             @Override
             public void onSheetStateChanged(BottomSheetLayout.State state) {
                 if (state == BottomSheetLayout.State.HIDDEN) {
-                    Utility.reSetView(chooseFromAlbum);
-                    chooseFromAlbum.setVisibility(View.VISIBLE);
+                    Utility.reSetView(civChooseFromAlbum);
                 }
             }
         });
@@ -203,11 +200,11 @@ public class MainActivity extends AppCompatActivity {
         switch (requestCode) {
             case TAKE_PHOTO:
                 if (resultCode == RESULT_OK && data != null) {
-                    final Uri tookPhoto = imageUri;
-                    if (tookPhoto != null) {
-                        notifyMediaUpdate(cameraImage);
+                    Uri photoUri = Uri.fromFile(mCameraFile);
+                    if (photoUri != null) {
+                        notifyMediaUpdate(mCameraFile);
                         Intent intent = new Intent(this, EditActivity.class);
-                        intent.putExtra("image", tookPhoto.toString());
+                        intent.putExtra("image", photoUri.toString());
                         startActivity(intent);
                     } else {
                         genericError(null);
@@ -232,13 +229,13 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-
+    // TODO: 2018/3/9 将权限申请移动至欢迎页
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         switch (requestCode) {
             case ALBUM_PERMISSION:
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    openAlbum();
+                    showSheet();
                 } else {
                     Toast.makeText(this, getString(R.string.denied_permission), Toast.LENGTH_SHORT).show();
                 }
@@ -270,16 +267,16 @@ public class MainActivity extends AppCompatActivity {
             buttonDatas.add(buttonData);
 
         }
-        expandableButton.setButtonDatas(buttonDatas);
+        mExpandableButton.setButtonDatas(buttonDatas);
 
     }
 
     private void openCamera() {
         Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
-            cameraImage = Utility.createImageFile();
-            imageUri = Utility.getFileUri(MainActivity.this,
-                    "vanxnf.photovalley.fileprovider", cameraImage);
+            mCameraFile = Utility.createImageFile();
+            Uri imageUri = Utility.getFileUri(MainActivity.this,
+                    "vanxnf.photovalley.fileprovider", mCameraFile);
             Intent intent = new Intent("android.media.action.IMAGE_CAPTURE");
             intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
             intent.putExtra(MediaStore.EXTRA_OUTPUT, imageUri);
@@ -288,7 +285,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void openAlbum() {
+    private void showSheet() {
         ImagePickerSheetView sheetView = new ImagePickerSheetView.Builder(this)
                 .setMaxItems(59)
                 .setShowCameraOption(false)
@@ -308,7 +305,7 @@ public class MainActivity extends AppCompatActivity {
                 .setOnTileSelectedListener(new ImagePickerSheetView.OnTileSelectedListener() {
                     @Override
                     public void onTileSelected(ImagePickerSheetView.ImagePickerTile selectedTile) {
-                        bottomSheetLayout.dismissSheet();
+                        mBottomSheetLayout.dismissSheet();
 
                         if (selectedTile.isPickerTile()) {
                             startActivityForResult(new Intent(MainActivity.this, AlbumPickerActivity.class), CHOOSE_PHOTO_FROM_ALBUM);
@@ -324,7 +321,7 @@ public class MainActivity extends AppCompatActivity {
                 .setTitle("Choose an image...")
                 .create();
 
-        bottomSheetLayout.showWithSheetView(sheetView);
+        mBottomSheetLayout.showWithSheetView(sheetView);
     }
 
     public void notifyMediaUpdate(File file) {
@@ -334,6 +331,11 @@ public class MainActivity extends AppCompatActivity {
         sendBroadcast(mediaScanIntent);
     }
 
+    public static void setIsDelete(boolean isDelete) {
+        MainActivity.isDelete = isDelete;
+    }
+
+    @Nullable
     private void genericError(String message) {
         Toast.makeText(this, message == null ? "Something went wrong." : message, Toast.LENGTH_SHORT).show();
     }

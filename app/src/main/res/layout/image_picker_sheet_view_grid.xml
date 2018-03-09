@@ -3,8 +3,7 @@
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@android:color/white"
-    >
+    android:background="@android:color/white" >
 
     <TextView
         android:id="@+id/title"
@@ -16,8 +15,7 @@
         android:layout_marginEnd="24dp"
         android:gravity="center_vertical"
         android:textColor="@color/text_gray"
-        android:textSize="16sp"
-        />
+        android:textSize="16sp" />
 
     <GridView
         android:id="@+id/grid"
@@ -25,7 +23,6 @@
         android:layout_height="match_parent"
         android:paddingBottom="24dp"
         android:clipToPadding="false"
-        android:scrollbarStyle="outsideOverlay"
-        />
+        android:scrollbarStyle="outsideOverlay" />
 
 </LinearLayout>

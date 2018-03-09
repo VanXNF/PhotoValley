@@ -1,14 +1,15 @@
 package vanxnf.photovalley;
 
 import android.content.SharedPreferences;
-import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import com.bumptech.glide.Glide;
-import com.bumptech.glide.request.target.ViewTarget;
+import com.bumptech.glide.request.target.SimpleTarget;
 import com.bumptech.glide.request.transition.Transition;
 import com.shizhefei.view.largeimage.LargeImageView;
 
@@ -17,27 +18,18 @@ import vanxnf.photovalley.utils.Utility;
 
 public class EditActivity extends AppCompatActivity {
 
-    private String image;
+    private String mEditImageString;
 
-    private ViewTarget viewTarget;
+    private LargeImageView livDisplayImage;
 
-    private LargeImageView largeImageView;
-
-    private SharedPreferences preferences;
+    private SharedPreferences mPref;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Utility.setStatusBarTransparent(getWindow());
         setContentView(R.layout.activity_edit);
-        image = getIntent().getStringExtra("image");
-        largeImageView = (LargeImageView) findViewById( R.id.large_image_view);
-        preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-        SharedPreferences.Editor editor = preferences.edit();
-        editor.putString("last_edit_image", image);
-        editor.apply();
-        MainActivity.isDelete = false;
-        loadLargeImageViewTarget();
+        loadImage();
 
     }
 
@@ -46,15 +38,24 @@ public class EditActivity extends AppCompatActivity {
         super.onResume();
     }
 
-    private void loadLargeImageViewTarget() {
+    /**从上一活动中获取图片Uri并显示*/
+    private void loadImage() {
 
-        viewTarget = new ViewTarget<LargeImageView, BitmapDrawable>( largeImageView ) {
+        livDisplayImage = (LargeImageView) findViewById( R.id.large_image_view);
+        mEditImageString = getIntent().getStringExtra("image");
+        mPref = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        SharedPreferences.Editor editor = mPref.edit();
+        editor.putString("last_edit_image", mEditImageString);
+        editor.apply();
+        MainActivity.setIsDelete(false);
+        Glide.with(this)
+                .load(Uri.parse(mEditImageString))
+                .into(new SimpleTarget<Drawable>() {
             @Override
-            public void onResourceReady(@NonNull BitmapDrawable resource, @Nullable Transition<? super BitmapDrawable> transition) {
-                largeImageView.setImageDrawable(resource);
+            public void onResourceReady(@NonNull Drawable resource, @Nullable Transition<? super Drawable> transition) {
+                livDisplayImage.setImage(resource);
             }
-        };
-        Glide.with(this).load(image).into(viewTarget);
-
+        });
     }
+
 }

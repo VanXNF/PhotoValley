@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     android:layout_margin="1dp"
     android:onClick="onPhotoListItemClick"
-    android:background="?attr/selectableItemBackground">
+    android:background="?android:attr/selectableItemBackgroundBorderless" >
 
     <ImageView
         android:id="@+id/ivPhoto"
@@ -24,4 +24,5 @@
         android:layout_height="wrap_content"
         android:layout_gravity="end"
         app:buttonTint="#fff" />
+
 </vanxnf.photovalley.features.albumpicker.SquareFrameLayout>
