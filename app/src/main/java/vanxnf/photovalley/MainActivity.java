@@ -287,7 +287,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void showSheet() {
         ImagePickerSheetView sheetView = new ImagePickerSheetView.Builder(this)
-                .setMaxItems(59)
+                .setMaxItems(33)
                 .setShowCameraOption(false)
                 .setShowPickerOption(true)
                 .setImageProvider(new ImagePickerSheetView.ImageProvider() {

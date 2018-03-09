@@ -24,7 +24,6 @@ final class ImagePickerSheetImageView extends AppCompatImageView {
     @SuppressWarnings("UnnecessaryLocalVariable")
     @Override
     public void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        int bothDimensionsSpec = widthMeasureSpec;
-        super.onMeasure(bothDimensionsSpec, bothDimensionsSpec);
+        super.onMeasure(widthMeasureSpec, widthMeasureSpec);
     }
 }

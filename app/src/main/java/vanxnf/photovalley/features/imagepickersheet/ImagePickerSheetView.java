@@ -195,7 +195,7 @@ public class ImagePickerSheetView extends FrameLayout {
         tileGrid.setDrawSelectorOnTop(true);
         tileGrid.setVerticalSpacing(spacing);
         tileGrid.setHorizontalSpacing(spacing);
-        tileGrid.setPadding(spacing, 0, spacing, 0);
+        tileGrid.setPadding(spacing, 0, spacing, spacing);
 
         // Set up the title
         titleView = (TextView) findViewById(R.id.title);
